@@ -8,6 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script src="{% static 'js/close.js' %}"></script>
 </head>
 <body>
 <div id="header">
@@ -40,7 +41,7 @@
     {% for message in messages %}
         <li class="{{ message.tags }}">
         {{ message|safe }}
-        <a href="#" class="close">x</a>
+        <a href="#" class="close" onclick="myRefresh()">x</a>
         </li>
     {% endfor %}
     </ul>
