@@ -4,9 +4,12 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .forms import ImageCreateForm
 from .models import Image
+from common.decorators import ajax_required
 
 
 @login_required
@@ -41,6 +44,7 @@ def image_detail(request, id, slug):
     return render(request, 'images/image/detail.html', context)
 
 
+@ajax_required
 @login_required
 @require_POST
 def image_like(request):
@@ -57,3 +61,25 @@ def image_like(request):
         except:
             pass
     return JsonResponse({'status': 'error'})
+
+
+@login_required
+def image_list(request):
+    images = Image.objects.all()
+    paginator = Paginator(images, 8)
+    page = request.GET.get('page')
+    try:
+        images = paginator.page(page)
+    except PageNotAnInteger:
+        images = paginator.page(1)
+    except EmptyPage:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return HttpResponse('')
+        images = paginator.page(paginator.num_pages)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request,
+                      'images/image/list_ajax.html',
+                      {'section': 'images', 'images': images})
+    return render(request,
+                  'images/image/list.html',
+                  {'section': 'images', 'images': images})
